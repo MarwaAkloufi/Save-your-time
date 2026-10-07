@@ -1,0 +1,45 @@
+name: yahala_admin
+description: "لوحة تحكم تطبيق اكسب وقتك (Flutter Web)"
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.10.4
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  # الاتصال بـ Apps Script
+  http: ^1.2.2
+
+  # اختيار الصور من معرض الصور / ملفات الجهاز
+  image_picker: ^1.1.2
+
+  # تذكّر كلمة السر على نفس الجهاز (اختياري من شاشة الدخول)
+  shared_preferences: ^2.3.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/images/
+
+  fonts:
+    - family: Cairo
+      fonts:
+        - asset: assets/fonts/Cairo-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Cairo-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Cairo-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Cairo-Bold.ttf
+          weight: 700
