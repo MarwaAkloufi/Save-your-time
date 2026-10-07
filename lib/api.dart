@@ -127,6 +127,10 @@ class AdminApi {
     }
 
     if (looksHtml) {
+      if (!await _isOnline()) {
+        throw AdminException(_offlineMessage(idempotent),
+            kind: AdminErrorKind.offline);
+      }
       throw const AdminException(
         'الرابط لا يُرجع بيانات صالحة. تأكدي من نشر آخر تحديث '
         'ومن ضبط الوصول على «أي شخص».',
@@ -138,6 +142,10 @@ class AdminApi {
     try {
       decoded = jsonDecode(text);
     } on FormatException {
+      if (!await _isOnline()) {
+        throw AdminException(_offlineMessage(idempotent),
+            kind: AdminErrorKind.offline);
+      }
       throw const AdminException(
         'الرد غير مفهوم من الخادم. أعِدي نشر التحديث وحاولي مجدداً.',
         kind: AdminErrorKind.server,
@@ -145,6 +153,10 @@ class AdminApi {
     }
 
     if (decoded is! Map) {
+      if (!await _isOnline()) {
+        throw AdminException(_offlineMessage(idempotent),
+            kind: AdminErrorKind.offline);
+      }
       throw const AdminException('رد غير متوقع من الخادم.',
           kind: AdminErrorKind.server);
     }

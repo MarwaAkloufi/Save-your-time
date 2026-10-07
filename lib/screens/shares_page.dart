@@ -17,7 +17,6 @@ class _SharesPageState extends State<SharesPage> {
 
   List<Map<String, dynamic>> _items = [];
   bool _loading = true;
-  bool _onlyUnread = false;
   String? _error;
 
   @override
@@ -97,8 +96,6 @@ class _SharesPageState extends State<SharesPage> {
 
   @override
   Widget build(BuildContext context) {
-    final shown = _onlyUnread ? _items.where((e) => !_isRead(e)).toList() : _items;
-
     return PageBody(
       child: RefreshIndicator(
         color: C.ideas,
@@ -112,25 +109,18 @@ class _SharesPageState extends State<SharesPage> {
               icon: Icons.edit_note_rounded,
               color: C.ideas,
               bgColor: C.ideasBg,
-              action: FilterChip(
-                label: const Text('غير المقروءة فقط'),
-                selected: _onlyUnread,
-                onSelected: (v) => setState(() => _onlyUnread = v),
-              ),
             ),
             if (_loading)
               const LoadingView()
             else if (_error != null)
               ErrorView(message: _error!, onRetry: _load)
-            else if (shown.isEmpty)
+            else if (_items.isEmpty)
               EmptyView(
                   icon: Icons.inbox_outlined,
-                  text: _onlyUnread
-                      ? 'لا توجد رسائل غير مقروءة 🎉'
-                      : 'لم يصل أي شيء من المستخدمين بعد.',
+                  text: 'لم يصل أي شيء من المستخدمين بعد.',
                   color: C.ideas)
             else
-              for (final it in shown)
+              for (final it in _items)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 12),
                   child: AdminCard(

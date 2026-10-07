@@ -265,7 +265,10 @@ class _ProductTile extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
+          Text(fmtDate(s(product, 'created_at')),
+              style: const TextStyle(fontSize: 13, color: C.textSoft)),
+          const SizedBox(height: 8),
           Row(
             children: [
               OutlinedButton.icon(
@@ -275,9 +278,6 @@ class _ProductTile extends StatelessWidget {
               ),
               const SizedBox(width: 10),
               DeleteButton(onPressed: onDelete),
-              const Spacer(),
-              Text(fmtDate(s(product, 'created_at')),
-                  style: const TextStyle(fontSize: 13, color: C.textSoft)),
             ],
           ),
         ],
