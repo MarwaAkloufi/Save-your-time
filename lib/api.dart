@@ -102,11 +102,14 @@ class AdminApi {
     } on TimeoutException {
       throw AdminException(_slowMessage(idempotent),
           kind: AdminErrorKind.slow);
-    } on http.ClientException {
-      throw AdminException(_offlineMessage(idempotent),
-          kind: AdminErrorKind.offline);
+    } on http.ClientException catch (e) {
+      // على الويب قد يكون سببه الشبكة أو CORS — لا نجزم بانقطاع النت.
+      throw AdminException(
+        'تعذّر الوصول إلى الخادم${_shorten(' ($e)')}. '
+        'تحققي من الشبكة ثم أعيدي المحاولة.',
+        kind: AdminErrorKind.offline,
+      );
     } catch (_) {
-      // المتصفح أحياناً يغلّف خطأ الشبكة بشكل مختلف
       throw AdminException(_offlineMessage(idempotent),
           kind: AdminErrorKind.offline);
     }
@@ -127,12 +130,9 @@ class AdminApi {
     }
 
     if (looksHtml) {
-      if (!await _isOnline()) {
-        throw AdminException(_offlineMessage(idempotent),
-            kind: AdminErrorKind.offline);
-      }
+      // وصلتنا استجابة فعلاً → الاتصال قائم، المشكل في الرابط أو النشر.
       throw const AdminException(
-        'الرابط لا يُرجع بيانات صالحة. تأكدي من نشر آخر تحديث '
+        'وصلنا رداً لكنه ليس بيانات. تأكدي أن نشر آخر تحديث (New version) '
         'ومن ضبط الوصول على «أي شخص».',
         kind: AdminErrorKind.access,
       );
@@ -142,23 +142,20 @@ class AdminApi {
     try {
       decoded = jsonDecode(text);
     } on FormatException {
-      if (!await _isOnline()) {
-        throw AdminException(_offlineMessage(idempotent),
-            kind: AdminErrorKind.offline);
-      }
       throw const AdminException(
-        'الرد غير مفهوم من الخادم. أعِدي نشر التحديث وحاولي مجدداً.',
+        'الرد ليس JSON صحيحاً. غالباً الكاش مكسور أو النشر قديم — أعيدي نشر '
+        'آخر تحديث (New version) ثم حاولي مجدداً.',
         kind: AdminErrorKind.server,
       );
     }
 
     if (decoded is! Map) {
-      if (!await _isOnline()) {
-        throw AdminException(_offlineMessage(idempotent),
-            kind: AdminErrorKind.offline);
-      }
-      throw const AdminException('رد غير متوقع من الخادم.',
-          kind: AdminErrorKind.server);
+      // نص بدل كائن = كاش مكسور على السيرفر (مثل "[object Object]")
+      throw AdminException(
+        'رد غير متوقع من الخادم: "${_shorten(text)}". '
+        'شغّلي clearCache من محرر Apps Script ثم أعيدي نشر آخر تحديث.',
+        kind: AdminErrorKind.server,
+      );
     }
 
     final map = Map<String, dynamic>.from(decoded);
@@ -181,8 +178,8 @@ class AdminApi {
           'إعادة المحاولة حتى لا يتكرر الإرسال.';
 
   String _offlineMessage(bool idempotent) => idempotent
-      ? 'لا يوجد اتصال بالإنترنت. تحققي من الشبكة ثم أعيدي المحاولة.'
-      : 'لا يوجد اتصال بالإنترنت. تأكدي هل حُفظت البيانات قبل '
+      ? 'تعذّر الوصول إلى الخادم. تحققي من الشبكة ثم أعيدي المحاولة.'
+      : 'تعذّر الوصول إلى الخادم. تأكدي هل حُفظت البيانات قبل '
           'إعادة المحاولة حتى لا يتكرر الإرسال.';
 
  
@@ -191,12 +188,6 @@ class AdminApi {
     bool looksHtml,
     bool idempotent,
   ) async {
-    // بقية رموز 4xx غالباً سببها الشبكة أو وسيط، لا سببها الكود
-    if (code != 401 && code != 403 && code != 429 && !await _isOnline()) {
-      return AdminException(_offlineMessage(idempotent),
-          kind: AdminErrorKind.offline);
-    }
-
     if (code == 401 || code == 403) {
       return const AdminException(
         'الوصول مرفوض. تأكدي أن «من يمكنه الوصول» = «أي شخص».',
@@ -222,15 +213,9 @@ class AdminApi {
     );
   }
 
-  Future<bool> _isOnline() async {
-    try {
-      final r = await http
-          .get(Uri.parse('https://www.gstatic.com/generate_204'))
-          .timeout(const Duration(seconds: 8));
-      return r.statusCode > 0;
-    } catch (_) {
-      return false;
-    }
+  String _shorten(String s) {
+    final t = s.trim().replaceAll(RegExp(r'\s+'), ' ');
+    return t.length <= 60 ? t : '${t.substring(0, 60)}…';
   }
 
   String _bodyText(http.Response res) {
