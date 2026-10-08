@@ -105,7 +105,8 @@ class _SharesPageState extends State<SharesPage> {
           children: [
             SectionHeader(
               title: 'أفكار المستخدمين',
-              subtitle: 'الرسائل التي أرسلها المستخدمون من «شاركنا بمعلومة»',
+              subtitle:
+                  'اضغطي «موافقة للعرض» ليظهر النص بقسم «مشاركات الزباين» بالتطبيق',
               icon: Icons.edit_note_rounded,
               color: C.ideas,
               bgColor: C.ideasBg,
@@ -139,7 +140,7 @@ class _SharesPageState extends State<SharesPage> {
                                   color: C.ideasBg,
                                   borderRadius: BorderRadius.circular(10),
                                 ),
-                                child: const Text('جديدة',
+                                child: const Text('بانتظار الموافقة',
                                     style: TextStyle(
                                         color: C.ideas,
                                         fontWeight: FontWeight.w800,
@@ -162,12 +163,12 @@ class _SharesPageState extends State<SharesPage> {
                               onPressed: () => _toggleRead(it),
                               icon: Icon(
                                   _isRead(it)
-                                      ? Icons.mark_email_unread_outlined
-                                      : Icons.done_all_rounded,
+                                      ? Icons.visibility_off_rounded
+                                      : Icons.visibility_rounded,
                                   size: 20),
                               label: Text(_isRead(it)
-                                  ? 'تعليم كغير مقروءة'
-                                  : 'تمت القراءة'),
+                                  ? 'إخفاء عن العرض'
+                                  : 'موافقة للعرض'),
                             ),
                             OutlinedButton.icon(
                               onPressed: () => _copy(s(it, 'content')),

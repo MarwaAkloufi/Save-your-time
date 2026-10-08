@@ -71,7 +71,7 @@ class _DashboardPageState extends State<DashboardPage> {
       _StatCard(
         title: 'أفكار المستخدمين',
         value: st.count('share'),
-        note: st.unreadShares > 0 ? '${st.unreadShares} جديدة' : null,
+        note: st.unreadShares > 0 ? '${st.unreadShares} بانتظار الموافقة' : null,
         icon: Icons.edit_note_rounded,
         color: C.ideas,
         bg: C.ideasBg,
